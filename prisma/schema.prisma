@@ -1,0 +1,82 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+enum TradeType {
+  BUY
+  SELL
+}
+
+enum Status {
+  CALCULATED
+  EXECUTED
+  RUNNING
+}
+model User {
+  id        String  @id @default(cuid())
+  email     String   @unique
+  name      String?
+  password  String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  trades    Trade[]
+}
+
+
+model Trade {
+  id              String   @id @default(cuid())
+  rowId           String?
+  symbol          String
+  tradeType       String
+  balance         Float
+  entryTime       DateTime
+  openPrice       Float
+  slPrice         Float
+  tpPrice         Float
+  priceNow        Float
+  pendingPips     Float
+  slPips          Float
+  tpPips          Float
+  rrPips          Float
+  rrSlPercentage  Float
+  rrTpPercentage  Float
+  lotSize         Float
+  nettSL          Float
+  nettTP          Float
+  error           Boolean  @default(false)
+  assetDecimals   Int
+  assetPipValue   Float
+  assetContract   Int
+  assetType       String
+  assetCurrency   String
+  assetMinLot     Float
+  assetPipsDec    Int
+  riskPercent     Float
+  note            String?
+  createdAt       DateTime @default(now())
+  status          Status  @default(CALCULATED)
+  userId          String
+  outcome       String?
+  exitTime       DateTime?
+  originalNettSL  Float?
+  originalNettTP  Float?
+  originalrrSlPercentage  Float?
+  originalrrTpPercentage  Float?
+  originalRrPips  Float?
+  originalTpPips  Float?
+  originalSlPips  Float?
+  originalTpPrice  Float?
+  user        User     @relation(fields: [userId], references: [id])
+}
