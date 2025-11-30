@@ -1,5 +1,4 @@
-import { PrismaClient } from "../generated/prisma/index.js";
-const prisma = new PrismaClient();
+import { prisma } from "../Utils/prisma.js";
 
 export const createTradeService = async (d, userId) => {
   try {
@@ -46,14 +45,29 @@ export const getTradeService = async (userId) => {
   try {
     const calculated = await prisma.trade.findMany({
       where: { status: "CALCULATED", userId: userId },
+      include: {
+        images: {
+          orderBy: { createdAt: "desc" },
+        },
+      },
     });
 
     const running = await prisma.trade.findMany({
       where: { status: "RUNNING", userId: userId },
+      include: {
+        images: {
+          orderBy: { createdAt: "desc" },
+        },
+      },
     });
 
     const executed = await prisma.trade.findMany({
       where: { status: "EXECUTED", userId: userId },
+      include: {
+        images: {
+          orderBy: { createdAt: "desc" },
+        },
+      },
     });
 
     return {
@@ -199,5 +213,22 @@ function formatTrade(trade) {
     originalRrPips: trade.originalRrPips,
     originalTpPips: trade.originalTpPips,
     originalTpPrice: trade.originalTpPrice,
+    images: trade.images,
   };
 }
+
+export const uploadImageToDatabase = async (userId, filename, tradeId) => {
+  return await prisma.image.create({
+    data: {
+      tradeId: tradeId,
+      filename,
+      userId,
+    },
+  });
+};
+
+export const getImageFromDatabase = async (userId) => {
+  return await prisma.image.findMany({
+    where: { userId: userId },
+  });
+};

@@ -11,7 +11,6 @@ generator client {
 
 datasource db {
   provider = "mysql"
-  url      = env("DATABASE_URL")
 }
 
 enum TradeType {
@@ -32,6 +31,7 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   trades    Trade[]
+  images    Image[]
 }
 
 
@@ -79,4 +79,15 @@ model Trade {
   originalSlPips  Float?
   originalTpPrice  Float?
   user        User     @relation(fields: [userId], references: [id])
+  images     Image[]
+}
+
+model Image {
+  id        Int      @id @default(autoincrement())
+  filename  String   @unique
+  userId    String
+  tradeId   String?
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id])
+  trade     Trade?   @relation(fields: [tradeId], references: [id])
 }

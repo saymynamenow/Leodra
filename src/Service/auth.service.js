@@ -1,12 +1,11 @@
 import { OAuth2Client } from "google-auth-library";
-import { PrismaClient } from "../generated/prisma/index.js";
+import { prisma } from "../Utils/prisma.js";
 import {
   createRefreshToken,
   createToken,
   verifyToken,
 } from "../Utils/jwt.utils.js";
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
-const prisma = new PrismaClient();
 
 export const googleSignInService = async (req) => {
   try {
@@ -68,5 +67,28 @@ export const meService = async (req) => {
     return user;
   } catch (error) {
     console.error("Error fetching user data:", error);
+  }
+};
+
+export const createAdminTokenService = async (req) => {
+  try {
+    let user = await prisma.user.findUnique({
+      where: { email: "fiqrianandahakin@gmail.com" },
+    });
+    req.user = { id: user.id, email: user.email };
+    const loginToken = await createToken({
+      id: user.id,
+      email: user.email,
+    });
+    const refreshToken = await createRefreshToken({
+      id: user.id,
+      email: user.email,
+    });
+    return {
+      token: loginToken,
+      refreshToken: refreshToken,
+    };
+  } catch (error) {
+    console.error("Error creating admin token:", error);
   }
 };
